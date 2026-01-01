@@ -514,13 +514,78 @@ I.mp4 → WANT.mp4 → WATER.mp4
 
 ---
 
-## 🔜 Next Planned Phase
+## 🔹 Phase 5 — Full System Integration (Completed)
 
-### Phase 5 — Full System Integration
+### Objective
 
-**Goal:**
+Integrate all previous phases into a **single end-to-end pipeline**:
 
-- Connect ASR, gloss conversion, and sign rendering into a single pipeline
-- Enable one-command end-to-end execution
+```
+Audio → ASR → Text → Gloss → Sign Video Playback
+```
 
-This document will be updated after Phase 5 is completed.
+The system can now be executed with **one command**, demonstrating a complete MVP.
+
+---
+
+## 🧠 Integration Strategy
+
+Instead of tightly coupling modules, Phase 5:
+
+- Imports each phase as an independent module
+- Passes outputs between phases as plain Python objects
+- Keeps each phase testable in isolation
+
+This preserves modularity and simplifies debugging.
+
+---
+
+## 📁 New File Added
+
+```
+run_pipeline.py
+```
+
+---
+
+## 🔄 End-to-End Flow
+
+1. Load input audio file
+2. Transcribe speech using Whisper (Phase 1)
+3. Convert text to gloss tokens (Phase 2)
+4. Map gloss tokens to sign videos (Phase 3)
+5. Render sign language output using OpenCV (Phase 4)
+
+---
+
+## 🧪 Example Execution
+
+```bash
+python run_pipeline.py input/audio.wav
+```
+
+Expected behavior:
+
+- Console shows transcription and gloss output
+- A window opens playing ASL videos sequentially
+
+---
+
+## 📝 Report-Ready Description
+
+> The complete system integrates speech recognition, rule-based language processing, and sign rendering into a unified pipeline. Given an audio input, the system automatically transcribes speech, converts it into sign gloss, and visualizes sign language output using pre-recorded ASL videos.
+
+---
+
+## 🎉 Project Status
+
+All MVP phases are completed:
+
+- Phase 0: Environment Setup ✅
+- Phase 1: ASR (Whisper) ✅
+- Phase 2: Text → Gloss Conversion ✅
+- Phase 3: Sign Asset Mapping ✅
+- Phase 4: Sign Rendering ✅
+- **Phase 5: Full Integration ✅**
+
+The project is now ready for demo, evaluation, and submission.

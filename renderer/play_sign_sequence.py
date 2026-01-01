@@ -50,6 +50,6 @@ def play_gloss_sequence(gloss_list):
 
 if __name__ == "__main__":
     # Example gloss input (temporary for Phase 4 testing)
-    test_gloss = ["I", "WANT", "WATER"]
+    test_gloss = ["YES", "I", "WANT", "WATER"]
 
     play_gloss_sequence(test_gloss)

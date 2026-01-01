@@ -42,3 +42,4 @@ if __name__ == "__main__":
     test_sentence = "I want to drink water"
     gloss = text_to_gloss(test_sentence)
     print(gloss)
+    
