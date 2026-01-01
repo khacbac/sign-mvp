@@ -70,6 +70,20 @@ def base_pose():
         "RIGHT_WRIST": (0.55, 0.4),
     }
 
+def want(frame, total):
+    t = frame / total
+    pull = 0.05 * (1 - t)
+    pose = base_pose()
+    pose["RIGHT_WRIST"] = (0.55 - pull, 0.45)
+    return pose
+
+def water(frame, total):
+    t = frame / total
+    tap = 0.02 * (frame % 5)
+    pose = base_pose()
+    pose["RIGHT_WRIST"] = (0.6, 0.45 + tap)
+    return pose
+
 GESTURE_MAP = {
     "IDLE": idle,
     "HELLO": hello,
@@ -81,4 +95,6 @@ GESTURE_MAP = {
     "GO": go,
     "STOP": stop,
     "BOOK": book,
+    "WANT": want,
+    "WATER": water,
 }

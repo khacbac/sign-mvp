@@ -6,6 +6,12 @@ STOPWORDS = {
     "do", "does", "did", "drink"
 }
 
+SYNONYMS = {
+    "I": "ME",
+    "MY": "ME",
+    "MINE": "ME",
+}
+
 def text_to_gloss(text: str) -> list[str]:
     """
     Convert natural language text into sign-language-friendly gloss.
@@ -33,6 +39,9 @@ def text_to_gloss(text: str) -> list[str]:
 
     # 5. Convert to uppercase gloss
     gloss_tokens = [word.upper() for word in filtered_words]
+    
+    # 6. Replace synonyms
+    gloss_tokens = [SYNONYMS.get(word, word) for word in gloss_tokens]
 
     return gloss_tokens
 

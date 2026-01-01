@@ -83,8 +83,37 @@ venv.bak/
 # Conda
 .conda/
 
-# Optional: Large media files (uncomment if you don't want to commit videos/audio)
+# ML/AI Model files
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.pb
+*.onnx
+*.tflite
+models/
+checkpoints/
+weights/
+
+# Whisper model cache (if downloaded to project directory)
+whisper_models/
+.cache/whisper/
+
+# Output directories
+output/
+results/
+rendered/
+generated/
+
+# Large media files (uncomment if you don't want to commit videos/audio)
 # input/*.wav
 # input/*.mp3
 # signs/videos/*.mp4
+
+# Data files (uncomment if you have large datasets)
+# data/
+# datasets/
+
+# Temporary conda environment files
+condaenv.*.requirements.txt
 
