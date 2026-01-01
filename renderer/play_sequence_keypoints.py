@@ -13,7 +13,7 @@ def play_sign_sequence(glosses):
         frames = generate_keypoints(gloss)
         for pose in frames:
             # render_frame(pose)
-            render_avatar(pose)
+            render_avatar(pose, text=gloss)
     plt.show()
 
 if __name__ == "__main__":

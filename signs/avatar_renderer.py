@@ -14,7 +14,7 @@ def draw_limb(a, b, width=6, color="black"):
     plt.plot([a[0], b[0]], [a[1], b[1]],
              linewidth=width, color=color, solid_capstyle="round")
 
-def render_avatar(pose):
+def render_avatar(pose, text=None):
     plt.clf()
 
     # --------------------
@@ -40,6 +40,15 @@ def render_avatar(pose):
 
         # Hand
         draw_circle(pose[wrist][0], pose[wrist][1], r=0.025)
+
+    # --------------------
+    # Text Display
+    # --------------------
+    if text:
+        plt.text(0.5, 0.85, text,
+                ha='center', va='center',
+                fontsize=16, fontweight='bold',
+                bbox=dict(boxstyle='round,pad=0.5', facecolor='lightblue', alpha=0.8))
 
     # --------------------
     # Canvas settings
