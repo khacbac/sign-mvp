@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ASL Gesture Definition",
+  "description": "Schema for defining American Sign Language gestures as keyframe sequences",
+  "type": "object",
+  "required": ["name", "frames", "keyframes"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Gesture name (usually uppercase, e.g., HELLO, THANK_YOU)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the gesture"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category for organizing gestures (e.g., greetings, pronouns, verbs)"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Optional tags for filtering/searching",
+      "items": {
+        "type": "string"
+      }
+    },
+    "frames": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of frames for this gesture animation"
+    },
+    "keyframes": {
+      "type": "array",
+      "description": "Key pose frames that define the gesture motion",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["time", "pose"],
+        "properties": {
+          "time": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Normalized time position (0=beginning, 1=end)"
+          },
+          "pose": {
+            "type": "object",
+            "description": "Joint positions at this keyframe",
+            "properties": {
+              "LEFT_SHOULDER": {
+                "type": "array",
+                "description": "Left shoulder joint coordinate [x, y]",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "LEFT_ELBOW": {
+                "type": "array",
+                "description": "Left elbow joint coordinate [x, y]",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "LEFT_WRIST": {
+                "type": "array",
+                "description": "Left wrist joint coordinate [x, y]",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "RIGHT_SHOULDER": {
+                "type": "array",
+                "description": "Right shoulder joint coordinate [x, y]",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "RIGHT_ELBOW": {
+                "type": "array",
+                "description": "Right elbow joint coordinate [x, y]",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "RIGHT_WRIST": {
+                "type": "array",
+                "description": "Right wrist joint coordinate [x, y]",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

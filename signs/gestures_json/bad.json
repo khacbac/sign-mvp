@@ -1,0 +1,154 @@
+{
+  "name": "BAD",
+  "description": "Descriptive gesture - signing 'bad'",
+  "category": "common",
+  "tags": [],
+  "frames": 30,
+  "keyframes": [
+    {
+      "time": 0.0,
+      "pose": {
+        "RIGHT_SHOULDER": [
+          0.55,
+          0.5
+        ],
+        "LEFT_WRIST": [
+          0.45,
+          0.4
+        ],
+        "RIGHT_ELBOW": [
+          0.55,
+          0.45
+        ],
+        "LEFT_SHOULDER": [
+          0.45,
+          0.5
+        ],
+        "RIGHT_WRIST": [
+          0.5,
+          0.35
+        ],
+        "LEFT_ELBOW": [
+          0.45,
+          0.45
+        ]
+      }
+    },
+    {
+      "time": 0.2413793103448276,
+      "pose": {
+        "RIGHT_SHOULDER": [
+          0.55,
+          0.5
+        ],
+        "LEFT_WRIST": [
+          0.45,
+          0.4
+        ],
+        "RIGHT_ELBOW": [
+          0.55,
+          0.45
+        ],
+        "LEFT_SHOULDER": [
+          0.45,
+          0.5
+        ],
+        "RIGHT_WRIST": [
+          0.535,
+          0.36166666666666664
+        ],
+        "LEFT_ELBOW": [
+          0.45,
+          0.45
+        ]
+      }
+    },
+    {
+      "time": 0.4827586206896552,
+      "pose": {
+        "RIGHT_SHOULDER": [
+          0.55,
+          0.5
+        ],
+        "LEFT_WRIST": [
+          0.45,
+          0.4
+        ],
+        "RIGHT_ELBOW": [
+          0.55,
+          0.45
+        ],
+        "LEFT_SHOULDER": [
+          0.45,
+          0.5
+        ],
+        "RIGHT_WRIST": [
+          0.57,
+          0.3733333333333333
+        ],
+        "LEFT_ELBOW": [
+          0.45,
+          0.45
+        ]
+      }
+    },
+    {
+      "time": 0.7241379310344828,
+      "pose": {
+        "RIGHT_SHOULDER": [
+          0.55,
+          0.5
+        ],
+        "LEFT_WRIST": [
+          0.45,
+          0.4
+        ],
+        "RIGHT_ELBOW": [
+          0.55,
+          0.45
+        ],
+        "LEFT_SHOULDER": [
+          0.45,
+          0.5
+        ],
+        "RIGHT_WRIST": [
+          0.605,
+          0.38499999999999995
+        ],
+        "LEFT_ELBOW": [
+          0.45,
+          0.45
+        ]
+      }
+    },
+    {
+      "time": 1.0,
+      "pose": {
+        "RIGHT_SHOULDER": [
+          0.55,
+          0.5
+        ],
+        "LEFT_WRIST": [
+          0.45,
+          0.4
+        ],
+        "RIGHT_ELBOW": [
+          0.55,
+          0.45
+        ],
+        "LEFT_SHOULDER": [
+          0.45,
+          0.5
+        ],
+        "RIGHT_WRIST": [
+          0.645,
+          0.3983333333333333
+        ],
+        "LEFT_ELBOW": [
+          0.45,
+          0.45
+        ]
+      }
+    }
+  ]
+}

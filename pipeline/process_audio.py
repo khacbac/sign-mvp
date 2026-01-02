@@ -8,7 +8,7 @@ sys.path.insert(0, str(project_root))
 
 from asr.transcribe import transcribe_audio
 from nlp.text_to_gloss import text_to_gloss
-from signs.gestures import GESTURE_MAP
+from signs.loader import gesture_exists
 from signs.generator import generate_keypoints
 from signs.avatar_renderer import render_avatar
 import matplotlib.pyplot as plt
@@ -41,7 +41,7 @@ def process_audio_to_avatar(audio_path):
     valid_glosses = []
 
     for gloss in gloss_sequence:
-        if gloss in GESTURE_MAP:
+        if gesture_exists(gloss):
             keypoints = generate_keypoints(gloss)
             all_keypoints.extend(keypoints)
             valid_glosses.append(gloss)
@@ -75,7 +75,7 @@ def process_text_to_avatar(text):
     valid_glosses = []
 
     for gloss in gloss_sequence:
-        if gloss in GESTURE_MAP:
+        if gesture_exists(gloss):
             keypoints = generate_keypoints(gloss)
             all_keypoints.extend(keypoints)
             valid_glosses.append(gloss)

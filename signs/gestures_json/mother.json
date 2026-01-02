@@ -1,0 +1,38 @@
+{
+  "name": "MOTHER",
+  "description": "Family sign - 'mother'",
+  "category": "family",
+  "tags": [],
+  "frames": 30,
+  "keyframes": [
+    {
+      "time": 0.0,
+      "pose": {
+        "LEFT_SHOULDER": [
+          0.45,
+          0.5
+        ],
+        "LEFT_ELBOW": [
+          0.45,
+          0.45
+        ],
+        "LEFT_WRIST": [
+          0.45,
+          0.4
+        ],
+        "RIGHT_SHOULDER": [
+          0.55,
+          0.5
+        ],
+        "RIGHT_ELBOW": [
+          0.55,
+          0.45
+        ],
+        "RIGHT_WRIST": [
+          0.52,
+          0.36
+        ]
+      }
+    }
+  ]
+}
