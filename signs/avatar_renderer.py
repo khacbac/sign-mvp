@@ -58,3 +58,71 @@ def render_avatar(pose, text=None):
     plt.gca().invert_yaxis()
     plt.axis("off")
     plt.pause(0.03)
+
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+
+def render_avatar_streamlit(placeholder, pose, text=None):
+    """
+    Render avatar in a Streamlit placeholder
+
+    Args:
+        placeholder: Streamlit empty placeholder (st.empty())
+        pose: Dict of pose keypoints
+        text: Optional text to display
+    """
+    # Create super compact figure with minimal margins
+    fig, ax = plt.subplots(figsize=(1.8, 2.5))
+    fig.subplots_adjust(left=0, right=1, top=0.95, bottom=0.05)  # Minimize margins
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0.25, 0.8)  # Adjusted viewport
+    ax.invert_yaxis()
+    ax.axis('off')
+
+    # --------------------
+    # Head
+    # --------------------
+    head_x = 0.5
+    head_y = 0.3
+    circle = plt.Circle((head_x, head_y), 0.05, color='black', fill=True)
+    ax.add_patch(circle)
+
+    # --------------------
+    # Body (shortened)
+    # --------------------
+    body_top = (0.5, 0.35)
+    body_bottom = (0.5, 0.5)
+    ax.plot([body_top[0], body_bottom[0]], [body_top[1], body_bottom[1]],
+            linewidth=6, color='black', solid_capstyle='round')
+
+    # --------------------
+    # Arms
+    # --------------------
+    for shoulder, elbow, wrist in ARMS:
+        # Draw arm segments
+        ax.plot([pose[shoulder][0], pose[elbow][0]],
+                [pose[shoulder][1], pose[elbow][1]],
+                linewidth=4, color='black', solid_capstyle='round')
+        ax.plot([pose[elbow][0], pose[wrist][0]],
+                [pose[elbow][1], pose[wrist][1]],
+                linewidth=4, color='black', solid_capstyle='round')
+
+        # Hand
+        hand_circle = plt.Circle((pose[wrist][0], pose[wrist][1]), 0.02,
+                               color='black', fill=True)
+        ax.add_patch(hand_circle)
+
+    # --------------------
+    # Text Display (compact)
+    # --------------------
+    if text:
+        # Very compact text above head, small font, no box
+        ax.text(0.5, 0.2, text,
+                ha='center', va='center',
+                fontsize=8,  # Small font
+                fontweight='normal')  # Normal weight to be less prominent
+
+    # Display in placeholder
+    placeholder.pyplot(fig)
+    plt.close(fig)

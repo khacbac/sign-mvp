@@ -1,36 +1,35 @@
+import argparse
 import sys
-import matplotlib.pyplot as plt
+from pathlib import Path
 
-from asr.transcribe import transcribe_audio
-from nlp.text_to_gloss import text_to_gloss
-from signs.generator import generate_keypoints
-from signs.avatar_renderer import render_avatar
+# Add the project root to Python path
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
-def play_sign_sequence(glosses):
-    plt.figure(figsize=(4, 6))
+from pipeline.process_audio import process_audio_to_avatar, animate_keypoints
 
-    for gloss in glosses:
-        frames = generate_keypoints(gloss)
-        for pose in frames:
-            render_avatar(pose, text=gloss)
+def main():
+    parser = argparse.ArgumentParser(description='Sign Language Translation Pipeline')
+    parser.add_argument('audio_file', type=str, help='Path to the audio file')
+    args = parser.parse_args()
 
-    plt.show()
+    # Process the audio
+    transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(args.audio_file)
 
-def main(audio_path):
-    print("[1] Transcribing audio...")
-    text = transcribe_audio(audio_path)
-    print("  → Text:", text)
+    # Display results
+    print("\n" + "="*50)
+    print("TRANSLATION COMPLETE")
+    print("="*50)
+    print(f"\nTranscription: {transcription}")
+    print(f"ASL Gloss: {' '.join(gloss_sequence)}")
+    print(f"\nValid signs: {len(valid_glosses)}")
+    print("="*50)
 
-    print("[2] Converting text to gloss...")
-    glosses = text_to_gloss(text)
-    print("  → Glosses:", glosses)
+    # Show the avatar animation
+    print("\nStarting avatar animation...")
+    animate_keypoints(all_keypoints, valid_glosses)
 
-    print("[3] Rendering avatar...")
-    play_sign_sequence(glosses)
+    print("Animation complete!")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python main.py input/audio.wav")
-        sys.exit(1)
-
-    main(sys.argv[1])
+    main()
