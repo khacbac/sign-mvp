@@ -16,22 +16,26 @@ This project provides an end-to-end pipeline for translating audio speech into A
 ```
 sign_mvp/
 ├── asr/
-│   └── transcribe.py          # Whisper-based audio transcription -> a Quang
+│   └── transcribe.py          # Whisper-based audio transcription
 ├── nlp/
-│   └── text_to_gloss.py       # Text-to-gloss conversion with ASL grammar rules -> a Viet Anh
-├── signs-skeleton/
-│   ├── gestures.py            # 50+ sign gesture definitions
-│   ├── generator.py           # Keypoint sequence generator
-│   └── avatar_renderer.py     # Matplotlib-based avatar visualization
-├── signs-videos/
-│   ├── gestures.py            # 50+ sign gesture definitions
-│   ├── generator.py           # Keypoint sequence generator
-│   └── avatar_renderer.py     # Matplotlib-based avatar visualization
+│   └── text_to_gloss.py       # Text-to-gloss conversion with ASL grammar rules
+├── avatar_engines/            # Avatar rendering engines
+│   ├── stick/                 # 2D stick figure animation (current implementation)
+│   │   ├── gestures/
+│   │   │   └── json/          # JSON gesture definitions
+│   │   ├── renderer.py        # Matplotlib-based avatar visualization
+│   │   ├── generator.py       # Keypoint sequence generator
+│   │   ├── interpolator.py    # Animation interpolator
+│   │   └── loader.py          # Gesture loader
+│   ├── skeleton/              # 3D skeleton-based animation (coming soon)
+│   └── human_video/           # Human video synthesis (coming soon)
 ├── input/                     # Sample audio files
 │   ├── audio.wav
 │   └── i_love_you.mp3
 ├── main.py                    # Full pipeline (audio → avatar)
 ├── demo_with_text.py          # Demo script with predefined glosses
+├── pipeline/                  # Processing pipeline module
+│   └── process_audio.py       # Audio processing pipeline
 └── environment.yml            # Conda environment specification
 ```
 
@@ -151,11 +155,11 @@ Example transformations:
 "I love you" → ['ME', 'LOVE', 'YOU']
 ```
 
-### 3. Gesture Generation (signs/generator.py)
+### 3. Gesture Generation (avatar_engines/stick/generator.py)
 
 Generates 30-frame keypoint sequences for each gloss using predefined gesture functions.
 
-### 4. Avatar Rendering (signs/avatar_renderer.py)
+### 4. Avatar Rendering (avatar_engines/stick/renderer.py)
 
 Renders a stick figure avatar with:
 
@@ -169,28 +173,15 @@ Renders a stick figure avatar with:
 
 ### Adding New Gestures
 
-1. Define the gesture function in `signs/gestures.py`:
+1. Create a JSON file in `avatar_engines/stick/gestures/json/` following the schema in `avatar_engines/stick/schema/gesture_schema.json`
 
-```python
-def new_gesture(frame, total):
-    t = frame / total
-    pose = base_pose()
-    pose["RIGHT_WRIST"] = (x_position, y_position)
-    return pose
-```
+2. The gesture will be automatically loaded and available for use
 
-2. Add to `GESTURE_MAP`:
-
-```python
-GESTURE_MAP = {
-    ...
-    "NEW-GESTURE": new_gesture,
-}
-```
+See `avatar_engines/stick/README.md` for detailed instructions.
 
 ### Adjusting Animation Speed
 
-In `signs/generator.py`, modify the `frames` parameter:
+In `avatar_engines/stick/generator.py`, modify the `frames` parameter:
 
 ```python
 def generate_keypoints(gloss, frames=30):  # Increase for slower animation

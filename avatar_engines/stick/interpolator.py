@@ -5,7 +5,7 @@ Interpolates between gesture keyframes to generate smooth animations.
 """
 
 from typing import Dict, List, Optional, Tuple, Any
-from signs.loader import load_gesture, VALID_JOINTS
+from .loader import load_gesture, VALID_JOINTS
 import logging
 
 logger = logging.getLogger(__name__)

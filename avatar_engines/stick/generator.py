@@ -1,6 +1,6 @@
 import logging
-from signs.loader import gesture_exists
-from signs.interpolator import interpolate_gesture, default_pose
+from .loader import gesture_exists
+from .interpolator import interpolate_gesture, default_pose
 
 # Set up logging
 logger = logging.getLogger(__name__)

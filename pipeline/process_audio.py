@@ -8,9 +8,9 @@ sys.path.insert(0, str(project_root))
 
 from asr.transcribe import transcribe_audio
 from nlp.text_to_gloss import text_to_gloss
-from signs.loader import gesture_exists
-from signs.generator import generate_keypoints
-from signs.avatar_renderer import render_avatar
+from avatar_engines.stick.loader import gesture_exists
+from avatar_engines.stick.generator import generate_keypoints
+from avatar_engines.stick.renderer import render_avatar
 import matplotlib.pyplot as plt
 
 def process_audio_to_avatar(audio_path):

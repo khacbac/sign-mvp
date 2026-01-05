@@ -39,7 +39,7 @@ class GestureLoader:
         """Load all gesture JSON files from the gestures directory"""
         # Get the gestures directory relative to this file
         current_dir = Path(__file__).parent
-        self._gestures_dir = current_dir / "gestures_json"
+        self._gestures_dir = current_dir / "gestures" / "json"
 
         if not self._gestures_dir.exists():
             logger.warning(f"Gestures directory not found: {self._gestures_dir}")

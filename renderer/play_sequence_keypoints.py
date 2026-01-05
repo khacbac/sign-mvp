@@ -3,9 +3,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import matplotlib.pyplot as plt
-from signs.generator import generate_keypoints
-from signs.renderer import render_frame
-from signs.avatar_renderer import render_avatar
+from avatar_engines.stick.generator import generate_keypoints
+from avatar_engines.stick.renderer import render_avatar
 
 def play_sign_sequence(glosses):
     plt.figure()

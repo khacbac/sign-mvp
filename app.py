@@ -8,7 +8,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from pipeline.process_audio import process_audio_to_avatar
-from signs.avatar_renderer import render_avatar_streamlit
+from avatar_engines.stick.renderer import render_avatar_streamlit
 import matplotlib.pyplot as plt
 
 # Page configuration
@@ -21,6 +21,42 @@ st.set_page_config(
 # Title
 st.title("🤟 Sign Language Translation System")
 st.markdown("Transform speech into American Sign Language (ASL) gestures")
+
+# Avatar engine selection
+st.sidebar.header("Avatar Settings")
+avatar_engine = st.sidebar.selectbox(
+    "Choose Avatar Engine:",
+    options=["stick", "skeleton", "human_video"],
+    format_func=lambda x: x.replace("_", " ").title(),
+    help="Select the avatar rendering engine"
+)
+
+# Store in session state
+st.session_state.avatar_engine = avatar_engine
+
+# Show coming soon messages for unimplemented engines
+def get_engine_alert_message(engine):
+    """Get the alert message for unimplemented engines"""
+    if engine == "skeleton":
+        return {
+            "title": "🚧 Skeleton Avatar Coming Soon!",
+            "message": "The 3D skeleton avatar is currently under development. Stay tuned for realistic bone-based animations with advanced kinematics!"
+        }
+    elif engine == "human_video":
+        return {
+            "title": "🚧 Human Video Avatar Coming Soon!",
+            "message": "Photorealistic human video synthesis is in development. This will feature lifelike sign language rendering with natural expressions!"
+        }
+    return None
+
+def is_engine_available(engine):
+    """Check if an engine is available/implemented"""
+    return engine == "stick"
+
+if avatar_engine == "skeleton":
+    st.sidebar.info("🚧 Skeleton avatar is coming soon! Currently using stick figure.")
+elif avatar_engine == "human_video":
+    st.sidebar.info("🚧 Human video avatar is coming soon! Currently using stick figure.")
 
 # Input method selection
 input_method = st.radio(
@@ -35,16 +71,56 @@ def show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glos
         # Animation only - super compact
         animation_placeholder = st.empty()
 
-        # Run animation in the dialog
-        frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
+        # Get the selected avatar engine
+        engine = st.session_state.get('avatar_engine', 'stick')
 
-        for i, pose in enumerate(all_keypoints):
-            # Determine which gloss to show
-            gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
-            current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
+        # Handle different engines
+        if engine == 'stick':
+            # Run animation in the dialog
+            frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
 
-            render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
-            time.sleep(0.03)
+            for i, pose in enumerate(all_keypoints):
+                # Determine which gloss to show
+                gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
+                current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
+
+                render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
+                time.sleep(0.03)
+
+        elif engine == 'skeleton':
+            animation_placeholder.markdown("""
+            <div style='text-align: center; padding: 20px;'>
+                <h3>🚧 Coming Soon!</h3>
+                <p>3D skeleton avatar is under development.</p>
+                <p>Currently showing stick figure preview:</p>
+            </div>
+            """, unsafe_allow_html=True)
+            # For now, show stick figure as preview
+            frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
+            for i, pose in enumerate(all_keypoints[:30]):  # Show fewer frames for preview
+                gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
+                current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
+                render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
+                time.sleep(0.05)
+
+        elif engine == 'human_video':
+            animation_placeholder.markdown("""
+            <div style='text-align: center; padding: 20px;'>
+                <h3>🚧 Coming Soon!</h3>
+                <p>Human video avatar is under development.</p>
+                <p>This will feature photorealistic sign language rendering.</p>
+                <br>
+                <p><em>Preview mode - stick figure:</em></p>
+            </div>
+            """, unsafe_allow_html=True)
+            time.sleep(2)
+            # For now, show stick figure as preview
+            frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
+            for i, pose in enumerate(all_keypoints[:30]):  # Show fewer frames for preview
+                gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
+                current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
+                render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
+                time.sleep(0.05)
 
     results_modal()
 
@@ -72,16 +148,19 @@ if input_method == "Local Audio Test":
                 
                 with col2:
                     # Create a translate button for each audio file
-                    if st.button("Translate", key=f"btn_local_{i}"):
+                    engine_available = is_engine_available(st.session_state.avatar_engine)
+                    button_help = "Select Stick Figure engine to enable translation" if not engine_available else "Translate this audio to sign language"
+
+                    if st.button("Translate", key=f"btn_local_{i}", disabled=not engine_available, help=button_help):
                         with st.spinner(f"Processing {audio_file.name}..."):
                             try:
                                 # Process the audio
                                 transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(audio_file))
-                                
+
                                 # Show results in popup
                                 st.success("✅ Translation complete!")
                                 show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
-                                
+
                             except Exception as e:
                                 st.error(f"Error processing audio: {str(e)}")
 
@@ -98,31 +177,36 @@ elif input_method == "Upload Audio File":
     if uploaded_file is not None:
         # Show audio player
         st.audio(uploaded_file)
-        
-        # Auto-process when file is uploaded
-        with st.spinner("Processing uploaded audio..."):
-            try:
-                # Save uploaded file temporarily
-                temp_dir = Path("temp")
-                temp_dir.mkdir(exist_ok=True)
-                temp_path = temp_dir / uploaded_file.name
-                
-                with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                
-                # Process the audio
-                transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(temp_path))
-                
-                # Show results in popup
-                st.success("✅ Translation complete!")
-                show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
-                
-            except Exception as e:
-                st.error(f"Error processing audio: {str(e)}")
-            finally:
-                # Clean up temp file
-                if 'temp_path' in locals() and temp_path.exists():
-                    temp_path.unlink()
+
+        # Check if selected engine is available
+        engine_available = is_engine_available(st.session_state.avatar_engine)
+        if not engine_available:
+            st.warning("🚧 Please select 'Stick Figure' engine in the sidebar to enable translation")
+        else:
+            # Auto-process when file is uploaded
+            with st.spinner("Processing uploaded audio..."):
+                try:
+                    # Save uploaded file temporarily
+                    temp_dir = Path("temp")
+                    temp_dir.mkdir(exist_ok=True)
+                    temp_path = temp_dir / uploaded_file.name
+
+                    with open(temp_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                    # Process the audio
+                    transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(temp_path))
+
+                    # Show results in popup
+                    st.success("✅ Translation complete!")
+                    show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
+
+                except Exception as e:
+                    st.error(f"Error processing audio: {str(e)}")
+                finally:
+                    # Clean up temp file
+                    if 'temp_path' in locals() and temp_path.exists():
+                        temp_path.unlink()
 
 # Option 3: Microphone Input
 elif input_method == "Microphone Input":
@@ -145,30 +229,35 @@ elif input_method == "Microphone Input":
 
             # Show audio player
             st.audio(audio_bytes_data)
-            
-            # Auto-process when recording is done
-            with st.spinner("Processing your recording..."):
-                try:
-                    # Save recorded audio (AudioSegment has export method)
-                    temp_dir = Path("temp")
-                    temp_dir.mkdir(exist_ok=True)
-                    temp_path = temp_dir / "recording.wav"
 
-                    audio_bytes.export(temp_path, format="wav")
+            # Check if selected engine is available
+            engine_available = is_engine_available(st.session_state.avatar_engine)
+            if not engine_available:
+                st.warning("🚧 Please select 'Stick Figure' engine in the sidebar to enable translation")
+            else:
+                # Auto-process when recording is done
+                with st.spinner("Processing your recording..."):
+                    try:
+                        # Save recorded audio (AudioSegment has export method)
+                        temp_dir = Path("temp")
+                        temp_dir.mkdir(exist_ok=True)
+                        temp_path = temp_dir / "recording.wav"
 
-                    # Process the audio
-                    transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(temp_path))
-                    
-                    # Show results in popup
-                    st.success("✅ Translation complete!")
-                    show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
-                    
-                except Exception as e:
-                    st.error(f"Error processing audio: {str(e)}")
-                finally:
-                    # Clean up temp file
-                    if temp_path.exists():
-                        temp_path.unlink()
+                        audio_bytes.export(temp_path, format="wav")
+
+                        # Process the audio
+                        transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(temp_path))
+
+                        # Show results in popup
+                        st.success("✅ Translation complete!")
+                        show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
+
+                    except Exception as e:
+                        st.error(f"Error processing audio: {str(e)}")
+                    finally:
+                        # Clean up temp file
+                        if temp_path.exists():
+                            temp_path.unlink()
     
     except ImportError:
         st.error("""
