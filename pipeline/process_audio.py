@@ -14,6 +14,7 @@ from avatar_engines.stick.renderer import render_avatar
 from avatar_engines.human_video import (
     get_gloss_mapper,
     create_video_loader,
+    get_best_videos_with_alternatives,
     gloss_exists as wlasl_gloss_exists
 )
 
@@ -82,61 +83,89 @@ def process_with_wlasl(transcription, gloss_sequence):
     """Process using WLASL human video avatar"""
     print("Step 3: Mapping glosses to WLASL videos...")
 
-    # Check if compositor is available
-    if not _compositor_available:
-        raise RuntimeError("Video compositor not available. Please install moviepy: pip install moviepy")
-
     # Initialize WLASL components
     mapper = get_gloss_mapper()
     loader = create_video_loader()
-    compositor = create_compositor()
 
-    # Map glosses to videos
-    video_metadata = []
+    # Check if compositor is available - do this after initializing components
+    if not _compositor_available:
+        raise RuntimeError("Video compositor not available. Please install moviepy: pip install moviepy")
+
+    # Map glosses to videos with alternatives for fallback
+    video_candidates = []  # List of (gloss, video_options)
     valid_glosses = []
     missing_glosses = []
 
     for gloss in gloss_sequence:
         if wlasl_gloss_exists(gloss):
-            best_video = mapper.get_best_video(gloss)
-            video_metadata.append(best_video)
-            valid_glosses.append(gloss)
+            # Get best videos with alternatives for fallback
+            video_options = get_best_videos_with_alternatives(gloss, max_results=3)
+            if video_options:
+                video_candidates.append((gloss, video_options))
+                valid_glosses.append(gloss)
+            else:
+                print(f"Warning: No video options found for '{gloss}', skipping...")
+                missing_glosses.append(gloss)
         else:
             print(f"Warning: '{gloss}' not found in WLASL dataset, skipping...")
             missing_glosses.append(gloss)
 
-    if not video_metadata:
-        raise ValueError("No valid glosses found in WLASL dataset")
+    if not video_candidates:
+        raise ValueError("No valid glosses with videos found in WLASL dataset")
 
-    print(f"Found {len(video_metadata)} videos for {len(valid_glosses)} glosses")
+    print(f"Found videos for {len(valid_glosses)} glosses")
+    if missing_glosses:
+        print(f"Skipped {len(missing_glosses)} missing glosses: {missing_glosses}")
 
-    # Step 4: Download videos
+    # Step 4: Download videos with fallback logic
     print("Step 4: Downloading videos...")
     video_paths = []
+    downloaded_glosses = []
 
-    for i, video_info in enumerate(video_metadata):
-        gloss = valid_glosses[i]
-        print(f"  Downloading '{gloss}' (video_id: {video_info['video_id']})")
+    for gloss, video_options in video_candidates:
+        video_path = None
 
-        video_path = loader.download_video(video_info['url'], video_info['video_id'])
-        if video_path:
-            video_paths.append(video_path)
-        else:
-            print(f"  Failed to download video for '{gloss}'")
+        # Try each video option in order of preference
+        for i, video_info in enumerate(video_options):
+            source = video_info.get('source', 'unknown')
+            video_id = video_info['video_id']
+            url = video_info['url']
+
+            if i == 0:
+                print(f"  Downloading '{gloss}' from {source} (video_id: {video_id})")
+            else:
+                print(f"    Trying alternative {i+1}: {source} (video_id: {video_id})")
+
+            video_path = loader.download_video(url, video_id)
+            if video_path:
+                downloaded_glosses.append(gloss)
+                video_paths.append(video_path)
+                break  # Success, no need to try more alternatives
+
+        if not video_path:
+            print(f"  Failed to download any video for '{gloss}'")
 
     if not video_paths:
-        raise RuntimeError("Failed to download any videos")
+        raise RuntimeError("Failed to download any videos from any source")
+
+    print(f"Successfully downloaded {len(video_paths)} videos")
 
     # Step 5: Composite videos
     print("Step 5: Compositing videos...")
-    output_path = compositor.composite_videos(video_paths, valid_glosses)
+
+    # Double-check that create_compositor is available (not None)
+    if create_compositor is None:
+        raise RuntimeError("Video compositor is None. Please ensure moviepy is properly installed.")
+
+    compositor = create_compositor()
+    output_path = compositor.composite_videos(video_paths, downloaded_glosses)
 
     if not output_path:
         raise RuntimeError("Failed to composite videos")
 
     print(f"Created composite video: {output_path}")
 
-    return transcription, gloss_sequence, output_path, valid_glosses
+    return transcription, gloss_sequence, output_path, downloaded_glosses
 
 def process_text_to_avatar(text):
     """

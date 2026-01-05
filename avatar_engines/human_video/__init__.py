@@ -9,6 +9,7 @@ from .gloss_mapper import (
     get_gloss_mapper,
     get_video_ids,
     get_best_video,
+    get_best_videos_with_alternatives,
     gloss_exists
 )
 from .video_loader import VideoLoader, create_video_loader
@@ -18,9 +19,9 @@ from .config import VIDEO_CACHE_DIR
 try:
     from .video_compositor import VideoCompositor, create_compositor
     _compositor_available = True
-except ImportError:
-    print("Warning: moviepy not found. Video composition features will be limited.")
-    print("Install with: pip install moviepy")
+except ImportError as e:
+    print(f"Warning: Failed to import video compositor: {e}")
+    print("Please ensure moviepy is installed: pip install moviepy")
     VideoCompositor = None
     create_compositor = None
     _compositor_available = False
@@ -30,6 +31,7 @@ __all__ = [
     "get_gloss_mapper",
     "get_video_ids",
     "get_best_video",
+    "get_best_videos_with_alternatives",
     "gloss_exists",
     "VideoLoader",
     "create_video_loader",

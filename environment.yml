@@ -11,3 +11,5 @@ dependencies:
       - matplotlib
       - streamlit>=1.29.0
       - streamlit-audiorecorder # For microphone input
+      - moviepy>=1.0.3  # For video compositing
+      - yt-dlp>=2024.12.13  # For YouTube video downloads

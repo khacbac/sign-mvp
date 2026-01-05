@@ -2,6 +2,7 @@
 Video Loader for WLASL Dataset
 
 Downloads and caches videos from WLASL dataset on-demand.
+Supports direct HTTP downloads and YouTube videos.
 """
 
 import logging
@@ -19,6 +20,15 @@ from .config import (
     CHUNK_SIZE,
     MAX_CACHE_SIZE_GB,
 )
+
+# Try to import yt-dlp (may not be installed)
+try:
+    import yt_dlp
+    _YT_DLP_AVAILABLE = True
+except ImportError:
+    yt_dlp = None
+    _YT_DLP_AVAILABLE = False
+    print("Warning: yt-dlp not available. YouTube videos cannot be downloaded.")
 
 logger = logging.getLogger(__name__)
 
@@ -97,9 +107,10 @@ class VideoLoader:
     def download_video(self, video_url: str, video_id: str) -> Optional[Path]:
         """
         Download a video from URL and cache it locally.
+        Supports both direct HTTP downloads and YouTube videos.
 
         Args:
-            video_url: URL to download video from
+            video_url: URL to download video from (HTTP or YouTube)
             video_id: Unique video ID for caching
 
         Returns:
@@ -109,7 +120,7 @@ class VideoLoader:
 
         # Check if already cached
         if cache_path.exists():
-            logger.debug(f"Video {video_id} already cached")
+            logger.debug(f"Video {video_id} already cached: {cache_path}")
             return cache_path
 
         # Check cache size before downloading
@@ -123,6 +134,60 @@ class VideoLoader:
         # Download the video
         logger.info(f"Downloading video {video_id} from {video_url}")
 
+        # Check if this is a YouTube URL
+        if self._is_youtube_url(video_url):
+            return self._download_youtube_video(video_url, video_id, cache_path)
+        else:
+            return self._download_http_video(video_url, video_id, cache_path)
+
+    def _is_youtube_url(self, url: str) -> bool:
+        """Check if a URL is a YouTube video URL"""
+        parsed = urlparse(url)
+        return (
+            parsed.netloc.lower().endswith('youtube.com') or
+            parsed.netloc.lower().endswith('youtu.be')
+        )
+
+    def _download_youtube_video(self, video_url: str, video_id: str, cache_path: Path) -> Optional[Path]:
+        """Download a YouTube video using yt-dlp"""
+        if not _YT_DLP_AVAILABLE:
+            logger.error("yt-dlp not available. Cannot download YouTube videos.")
+            return None
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                # Configure yt-dlp options
+                ydl_opts = {
+                    'format': 'best[ext=mp4]/best',  # Prefer mp4, otherwise best format
+                    'outtmpl': str(cache_path.with_suffix('').with_suffix('')),
+                    'quiet': True,
+                    'no-warnings': True,
+                    'noprogress': True,
+                    'cookiefile': None,  # Could add cookies for age-restricted videos
+                }
+
+                # Download video
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    logger.debug(f"Downloading YouTube video {video_id}")
+                    result = ydl.download([video_url])
+
+                    if result == 0:  # Success
+                        logger.info(f"Successfully downloaded YouTube video {video_id}")
+                        return cache_path
+                    else:
+                        logger.error(f"yt-dlp download failed with code {result}")
+
+            except Exception as e:
+                logger.warning(f"YouTube download attempt {attempt + 1} failed: {e}")
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(2 ** attempt)  # Exponential backoff
+                else:
+                    logger.error(f"Failed to download YouTube video {video_id} after {MAX_RETRIES} attempts")
+
+        return None
+
+    def _download_http_video(self, video_url: str, video_id: str, cache_path: Path) -> Optional[Path]:
+        """Download video via HTTP using requests"""
         for attempt in range(MAX_RETRIES):
             try:
                 # Send GET request with streaming
@@ -161,7 +226,7 @@ class VideoLoader:
                 return cache_path
 
             except requests.exceptions.RequestException as e:
-                logger.warning(f"Download attempt {attempt + 1} failed: {e}")
+                logger.warning(f"HTTP download attempt {attempt + 1} failed: {e}")
                 if attempt < MAX_RETRIES - 1:
                     time.sleep(2 ** attempt)  # Exponential backoff
                 else:

@@ -115,6 +115,37 @@ class GlossMapper:
         # If no preferred source found, return first video
         return videos[0]
 
+    def get_best_videos_with_alternatives(self, gloss: str, max_results: int = 5) -> List[Dict[str, Any]]:
+        """
+        Get the best video for a gloss with alternative options for fallback.
+
+        Args:
+            gloss: The sign language gloss (case-insensitive)
+            max_results: Maximum number of video alternatives to return
+
+        Returns:
+            List of video metadata dictionaries sorted by preference
+        """
+        videos = self.get_video_metadata(gloss)
+        if not videos:
+            return []
+
+        # Sort videos by source preference
+        scored_videos = []
+        for video in videos:
+            source = video.get('source', '')
+            try:
+                # Lower score is better (higher in preference list)
+                score = PREFERRED_SOURCES.index(source)
+            except ValueError:
+                # Source not in preferred list, assign low priority
+                score = len(PREFERRED_SOURCES) + 1
+            scored_videos.append((score, video))
+
+        # Sort by score (preference) and return top results
+        scored_videos.sort(key=lambda x: x[0])
+        return [video for _, video in scored_videos[:max_results]]
+
     def get_video_count(self, gloss: str) -> int:
         """
         Get the number of videos available for a gloss.
@@ -180,6 +211,11 @@ def get_best_video(gloss: str) -> Optional[Dict[str, Any]]:
     return get_gloss_mapper().get_best_video(gloss)
 
 
+def get_best_videos_with_alternatives(gloss: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    """Convenience function to get best video with alternatives for a gloss"""
+    return get_gloss_mapper().get_best_videos_with_alternatives(gloss, max_results)
+
+
 def gloss_exists(gloss: str) -> bool:
     """Convenience function to check if gloss exists"""
     return get_gloss_mapper().gloss_exists(gloss)
@@ -190,5 +226,6 @@ __all__ = [
     "get_gloss_mapper",
     "get_video_ids",
     "get_best_video",
+    "get_best_videos_with_alternatives",
     "gloss_exists",
 ]

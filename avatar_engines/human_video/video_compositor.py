@@ -10,8 +10,17 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 
-from moviepy.editor import VideoFileClip, concatenate_videoclips
-from moviepy.video.fx import fadein, fadeout
+# Handle both moviepy 1.x and 2.x
+import moviepy
+MOVIE_PY_VERSION = getattr(moviepy, '__version__', '1.0.0')
+
+try:
+    # Try moviepy 2.x imports first
+    from moviepy import VideoFileClip, concatenate_videoclips
+except ImportError:
+    # Fall back to moviepy 1.x imports
+    from moviepy.editor import VideoFileClip, concatenate_videoclips
+    from moviepy.video.fx import fadein, fadeout
 
 from .config import (
     OUTPUT_VIDEO_WIDTH,
@@ -62,20 +71,43 @@ class VideoCompositor:
             VideoFileClip or None if loading failed
         """
         try:
+            if not video_path.exists():
+                logger.error(f"Video file does not exist: {video_path}")
+                return None
+
+            logger.debug(f"Loading video clip: {video_path} (size: {video_path.stat().st_size} bytes)")
+
             clip = VideoFileClip(str(video_path))
 
-            # Resize if necessary
-            if clip.size != (self.output_width, self.output_height):
-                clip = clip.resize((self.output_width, self.output_height))
+            # Log video properties
+            logger.debug(f"Video loaded: {clip.size}, {clip.fps:.2f}fps, {clip.duration:.2f}s")
 
-            # Set FPS if necessary
+            # Resize if necessary (handle both MoviePy 1.x and 2.x)
+            if clip.size != (self.output_width, self.output_height):
+                logger.debug(f"Resizing video from {clip.size} to {(self.output_width, self.output_height)}")
+                try:
+                    # MoviePy 2.x
+                    clip = clip.resized((self.output_width, self.output_height))
+                except AttributeError:
+                    # MoviePy 1.x
+                    clip = clip.resize((self.output_width, self.output_height))
+
+            # Set FPS if necessary (handle both MoviePy 1.x and 2.x)
             if clip.fps != self.output_fps:
-                clip = clip.set_fps(self.output_fps)
+                logger.debug(f"Setting FPS from {clip.fps} to {self.output_fps}")
+                try:
+                    # MoviePy 2.x
+                    clip = clip.with_fps(self.output_fps)
+                except AttributeError:
+                    # MoviePy 1.x
+                    clip = clip.set_fps(self.output_fps)
 
             return clip
 
         except Exception as e:
             logger.error(f"Failed to load video {video_path}: {e}")
+            import traceback
+            logger.error(f"Load error traceback:\n{traceback.format_exc()}")
             return None
 
     def _create_transition(self, clip1: VideoFileClip, clip2: VideoFileClip) -> VideoFileClip:
@@ -146,6 +178,9 @@ class VideoCompositor:
 
         try:
             logger.info(f"Compositing {len(clips)} videos")
+            logger.info(f"Video settings: {self.output_width}x{self.output_height} @ {self.output_fps}fps")
+            logger.info(f"Temp directory: {TEMP_DIR} (exists: {TEMP_DIR.exists()})")
+            logger.info(f"Using moviepy version: {MOVIE_PY_VERSION}")
 
             # Create final video
             if add_transitions:
@@ -194,6 +229,16 @@ class VideoCompositor:
 
         except Exception as e:
             logger.error(f"Failed to composite videos: {e}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Video paths: {[str(p) for p in video_paths]}")
+            logger.error(f"Number of clips loaded: {len(clips)}")
+            logger.error(f"Temp dir exists: {TEMP_DIR.exists()}")
+            logger.error(f"Output path: {output_path if output_path else 'None'}")
+
+            # Import traceback for full error details
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+
             return None
 
     def generate_output_filename(self, gloss_sequence: List[str]) -> Path:
