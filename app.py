@@ -34,29 +34,34 @@ avatar_engine = st.sidebar.selectbox(
 # Store in session state
 st.session_state.avatar_engine = avatar_engine
 
-# Show coming soon messages for unimplemented engines
-def get_engine_alert_message(engine):
-    """Get the alert message for unimplemented engines"""
-    if engine == "skeleton":
+# Show engine-specific messages
+def get_engine_description(engine):
+    """Get description for the selected engine"""
+    if engine == "stick":
         return {
-            "title": "🚧 Skeleton Avatar Coming Soon!",
-            "message": "The 3D skeleton avatar is currently under development. Stay tuned for realistic bone-based animations with advanced kinematics!"
+            "title": "✅ Stick Figure Avatar",
+            "message": "2D stick figure animation with smooth interpolation and gesture labels."
+        }
+    elif engine == "skeleton":
+        return {
+            "title": "🚧 Skeleton Avatar (Coming Soon)",
+            "message": "Currently using stick figure. The 3D skeleton avatar is under development."
         }
     elif engine == "human_video":
         return {
-            "title": "🚧 Human Video Avatar Coming Soon!",
-            "message": "Photorealistic human video synthesis is in development. This will feature lifelike sign language rendering with natural expressions!"
+            "title": "🎬 Human Video Avatar (NEW!)",
+            "message": "Real sign language videos from WLASL dataset. Videos are downloaded and composited on-demand."
         }
     return None
 
 def is_engine_available(engine):
     """Check if an engine is available/implemented"""
-    return engine == "stick"
+    return engine in ["stick", "human_video"]
 
-if avatar_engine == "skeleton":
-    st.sidebar.info("🚧 Skeleton avatar is coming soon! Currently using stick figure.")
-elif avatar_engine == "human_video":
-    st.sidebar.info("🚧 Human video avatar is coming soon! Currently using stick figure.")
+# Show engine description
+desc = get_engine_description(avatar_engine)
+if desc:
+    st.sidebar.info(f"**{desc['title']}**\n\n{desc['message']}")
 
 # Input method selection
 input_method = st.radio(
@@ -64,63 +69,52 @@ input_method = st.radio(
     ("Local Audio Test", "Upload Audio File", "Microphone Input")
 )
 
-def show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses):
-    """Show results in ultra-compact dialog popup"""
-    @st.dialog("🤟", width="small")
+def show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoints=None, video_path=None):
+    """Show results in dialog popup"""
+    @st.dialog("🤟", width="medium")
     def results_modal():
-        # Animation only - super compact
-        animation_placeholder = st.empty()
-
         # Get the selected avatar engine
         engine = st.session_state.get('avatar_engine', 'stick')
 
-        # Handle different engines
-        if engine == 'stick':
+        if engine == 'human_video' and video_path:
+            # Show video player for human_video engine
+            st.video(str(video_path))
+            st.caption(f"Translation: {' '.join(valid_glosses)}")
+
+            # Show download button
+            with open(video_path, 'rb') as f:
+                st.download_button(
+                    label="Download Video",
+                    data=f,
+                    file_name=f"{'_'.join(valid_glosses)}.mp4",
+                    mime="video/mp4"
+                )
+
+        elif engine == 'stick':
+            # Show stick figure animation
+            animation_placeholder = st.empty()
+
             # Run animation in the dialog
-            frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
+            if all_keypoints and valid_glosses:
+                frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
 
-            for i, pose in enumerate(all_keypoints):
-                # Determine which gloss to show
-                gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
-                current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
+                for i, pose in enumerate(all_keypoints):
+                    # Determine which gloss to show
+                    gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
+                    current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
 
-                render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
-                time.sleep(0.03)
+                    render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
+                    time.sleep(0.03)
+            else:
+                st.info("No animation data available")
 
         elif engine == 'skeleton':
-            animation_placeholder.markdown("""
-            <div style='text-align: center; padding: 20px;'>
-                <h3>🚧 Coming Soon!</h3>
-                <p>3D skeleton avatar is under development.</p>
-                <p>Currently showing stick figure preview:</p>
-            </div>
-            """, unsafe_allow_html=True)
-            # For now, show stick figure as preview
-            frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
-            for i, pose in enumerate(all_keypoints[:30]):  # Show fewer frames for preview
-                gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
-                current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
-                render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
-                time.sleep(0.05)
+            st.info("🚧 Skeleton avatar is coming soon!")
+            st.write(f"Detected glosses: {', '.join(valid_glosses)}")
 
-        elif engine == 'human_video':
-            animation_placeholder.markdown("""
-            <div style='text-align: center; padding: 20px;'>
-                <h3>🚧 Coming Soon!</h3>
-                <p>Human video avatar is under development.</p>
-                <p>This will feature photorealistic sign language rendering.</p>
-                <br>
-                <p><em>Preview mode - stick figure:</em></p>
-            </div>
-            """, unsafe_allow_html=True)
-            time.sleep(2)
-            # For now, show stick figure as preview
-            frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
-            for i, pose in enumerate(all_keypoints[:30]):  # Show fewer frames for preview
-                gloss_idx = min(i // frames_per_gloss, len(valid_glosses) - 1) if frames_per_gloss > 0 else 0
-                current_gloss = valid_glosses[gloss_idx] if valid_glosses else ""
-                render_avatar_streamlit(animation_placeholder, pose, text=current_gloss)
-                time.sleep(0.05)
+        else:  # Other engines
+            st.info("🚧 This avatar engine is not yet implemented.")
+            st.write(f"Detected glosses: {', '.join(valid_glosses)}")
 
     results_modal()
 
@@ -154,12 +148,19 @@ if input_method == "Local Audio Test":
                     if st.button("Translate", key=f"btn_local_{i}", disabled=not engine_available, help=button_help):
                         with st.spinner(f"Processing {audio_file.name}..."):
                             try:
+                                # Get the selected engine
+                                engine = st.session_state.get('avatar_engine', 'stick')
+
                                 # Process the audio
-                                transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(audio_file))
+                                result = process_audio_to_avatar(str(audio_file), engine=engine)
+                                transcription, gloss_sequence, result_data, valid_glosses = result
 
                                 # Show results in popup
                                 st.success("✅ Translation complete!")
-                                show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
+                                if engine == 'human_video':
+                                    show_results_dialog(transcription, gloss_sequence, valid_glosses, video_path=result_data)
+                                else:
+                                    show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoints=result_data)
 
                             except Exception as e:
                                 st.error(f"Error processing audio: {str(e)}")
@@ -195,11 +196,16 @@ elif input_method == "Upload Audio File":
                         f.write(uploaded_file.getbuffer())
 
                     # Process the audio
-                    transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(temp_path))
+                    engine = st.session_state.get('avatar_engine', 'stick')
+                    result = process_audio_to_avatar(str(temp_path), engine=engine)
+                    transcription, gloss_sequence, result_data, valid_glosses = result
 
                     # Show results in popup
                     st.success("✅ Translation complete!")
-                    show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
+                    if engine == 'human_video':
+                        show_results_dialog(transcription, gloss_sequence, valid_glosses, video_path=result_data)
+                    else:
+                        show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoints=result_data)
 
                 except Exception as e:
                     st.error(f"Error processing audio: {str(e)}")
@@ -246,11 +252,16 @@ elif input_method == "Microphone Input":
                         audio_bytes.export(temp_path, format="wav")
 
                         # Process the audio
-                        transcription, gloss_sequence, all_keypoints, valid_glosses = process_audio_to_avatar(str(temp_path))
+                        engine = st.session_state.get('avatar_engine', 'stick')
+                        result = process_audio_to_avatar(str(temp_path), engine=engine)
+                        transcription, gloss_sequence, result_data, valid_glosses = result
 
                         # Show results in popup
                         st.success("✅ Translation complete!")
-                        show_results_dialog(transcription, gloss_sequence, all_keypoints, valid_glosses)
+                        if engine == 'human_video':
+                            show_results_dialog(transcription, gloss_sequence, valid_glosses, video_path=result_data)
+                        else:
+                            show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoints=result_data)
 
                     except Exception as e:
                         st.error(f"Error processing audio: {str(e)}")
