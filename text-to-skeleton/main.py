@@ -31,6 +31,7 @@ app.mount("/output", StaticFiles(directory=output_dir), name="output")
 @app.get("/text-to-gloss")
 async def text_to_gloss(text: str):
     glosses = text_to_gloss__spacy_lemma(text, language="en", ignore_punctuation=True)
+    print("glosses", glosses)
 
     return glosses
 

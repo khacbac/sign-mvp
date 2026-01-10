@@ -10,7 +10,9 @@ LANGUAGE_MODELS_SPACY = {
 }
 
 
-def text_to_gloss__spacy_lemma(text: str, language: str, ignore_punctuation: bool = False, **unused_kwargs) -> List[Gloss]:
+def text_to_gloss__spacy_lemma(
+    text: str, language: str, ignore_punctuation: bool = False, **unused_kwargs
+) -> List[Gloss]:
     if language not in LANGUAGE_MODELS_SPACY:
         raise NotImplementedError("Don't know language '%s'." % language)
 
@@ -25,8 +27,12 @@ def text_to_gloss__spacy_lemma(text: str, language: str, ignore_punctuation: boo
     glosses = []  # type: Gloss
 
     for token in doc:
+        print("token", token.lemma_)
         if ignore_punctuation is True:
             if token.is_punct:
+                continue
+            # magic code
+            if token.lemma_ == "be":
                 continue
 
         gloss = (token.text, token.lemma_)
