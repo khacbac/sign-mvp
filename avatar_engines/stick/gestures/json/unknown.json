@@ -1,0 +1,42 @@
+{
+  "name": "UNKNOWN",
+  "description": "Fallback gesture for unknown words - neutral pose with slight wave",
+  "category": "system",
+  "tags": ["fallback", "placeholder"],
+  "frames": 20,
+  "keyframes": [
+    {
+      "time": 0.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.42, 0.45],
+        "LEFT_WRIST": [0.4, 0.42],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.58, 0.45],
+        "RIGHT_WRIST": [0.6, 0.42]
+      }
+    },
+    {
+      "time": 0.5,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.42, 0.45],
+        "LEFT_WRIST": [0.38, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.58, 0.45],
+        "RIGHT_WRIST": [0.62, 0.4]
+      }
+    },
+    {
+      "time": 1.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.42, 0.45],
+        "LEFT_WRIST": [0.4, 0.42],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.58, 0.45],
+        "RIGHT_WRIST": [0.6, 0.42]
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "SAD",
+  "description": "Sad emotion - hands moving down at face",
+  "category": "emotions",
+  "tags": ["feeling", "emotion"],
+  "frames": 30,
+  "keyframes": [
+    {
+      "time": 0.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.44, 0.42],
+        "LEFT_WRIST": [0.43, 0.35],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.56, 0.42],
+        "RIGHT_WRIST": [0.57, 0.35]
+      }
+    },
+    {
+      "time": 0.5,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.44, 0.43],
+        "LEFT_WRIST": [0.43, 0.38],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.56, 0.43],
+        "RIGHT_WRIST": [0.57, 0.38]
+      }
+    },
+    {
+      "time": 1.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.44, 0.44],
+        "LEFT_WRIST": [0.43, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.56, 0.44],
+        "RIGHT_WRIST": [0.57, 0.4]
+      }
+    }
+  ]
+}

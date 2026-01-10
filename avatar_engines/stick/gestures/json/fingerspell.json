@@ -1,0 +1,64 @@
+{
+  "name": "FINGERSPELL",
+  "description": "Indicates fingerspelling of a word letter by letter",
+  "category": "system",
+  "tags": ["fingerspelling", "fallback"],
+  "frames": 20,
+  "keyframes": [
+    {
+      "time": 0.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.45, 0.45],
+        "LEFT_WRIST": [0.45, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.55, 0.42],
+        "RIGHT_WRIST": [0.53, 0.38]
+      }
+    },
+    {
+      "time": 0.25,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.45, 0.45],
+        "LEFT_WRIST": [0.45, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.55, 0.42],
+        "RIGHT_WRIST": [0.55, 0.38]
+      }
+    },
+    {
+      "time": 0.5,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.45, 0.45],
+        "LEFT_WRIST": [0.45, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.55, 0.42],
+        "RIGHT_WRIST": [0.57, 0.38]
+      }
+    },
+    {
+      "time": 0.75,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.45, 0.45],
+        "LEFT_WRIST": [0.45, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.55, 0.42],
+        "RIGHT_WRIST": [0.55, 0.38]
+      }
+    },
+    {
+      "time": 1.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.45, 0.45],
+        "LEFT_WRIST": [0.45, 0.4],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.55, 0.42],
+        "RIGHT_WRIST": [0.53, 0.38]
+      }
+    }
+  ]
+}

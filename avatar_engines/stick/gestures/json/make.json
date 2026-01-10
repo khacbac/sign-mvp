@@ -1,0 +1,53 @@
+{
+  "name": "MAKE",
+  "description": "Make/create - fists twisting together",
+  "category": "verbs",
+  "tags": ["action", "create"],
+  "frames": 30,
+  "keyframes": [
+    {
+      "time": 0.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.47, 0.47],
+        "LEFT_WRIST": [0.48, 0.45],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.53, 0.47],
+        "RIGHT_WRIST": [0.52, 0.45]
+      }
+    },
+    {
+      "time": 0.33,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.47, 0.47],
+        "LEFT_WRIST": [0.49, 0.44],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.53, 0.47],
+        "RIGHT_WRIST": [0.51, 0.46]
+      }
+    },
+    {
+      "time": 0.66,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.47, 0.47],
+        "LEFT_WRIST": [0.48, 0.46],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.53, 0.47],
+        "RIGHT_WRIST": [0.52, 0.44]
+      }
+    },
+    {
+      "time": 1.0,
+      "pose": {
+        "LEFT_SHOULDER": [0.45, 0.5],
+        "LEFT_ELBOW": [0.47, 0.47],
+        "LEFT_WRIST": [0.48, 0.45],
+        "RIGHT_SHOULDER": [0.55, 0.5],
+        "RIGHT_ELBOW": [0.53, 0.47],
+        "RIGHT_WRIST": [0.52, 0.45]
+      }
+    }
+  ]
+}

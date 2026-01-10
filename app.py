@@ -70,12 +70,12 @@ input_method = st.radio(
 )
 
 def show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoints=None, video_path=None):
-    """Show results in dialog popup"""
-    @st.dialog("🤟", width="medium")
-    def results_modal():
-        # Get the selected avatar engine
-        engine = st.session_state.get('avatar_engine', 'stick')
+    """Show results in an expander (compatible alternative to dialog)"""
+    # Get the selected avatar engine
+    engine = st.session_state.get('avatar_engine', 'stick')
 
+    # Use expander as a compatible alternative to dialog
+    with st.expander("🤟 Translation Results", expanded=True):
         if engine == 'human_video' and video_path:
             # Show video player for human_video engine
             st.video(str(video_path))
@@ -94,7 +94,7 @@ def show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoi
             # Show stick figure animation
             animation_placeholder = st.empty()
 
-            # Run animation in the dialog
+            # Run animation
             if all_keypoints and valid_glosses:
                 frames_per_gloss = len(all_keypoints) // len(valid_glosses) if valid_glosses else 0
 
@@ -115,8 +115,6 @@ def show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoi
         else:  # Other engines
             st.info("🚧 This avatar engine is not yet implemented.")
             st.write(f"Detected glosses: {', '.join(valid_glosses)}")
-
-    results_modal()
 
 # Option 1: Local Audio Buttons
 if input_method == "Local Audio Test":
