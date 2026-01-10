@@ -26,6 +26,20 @@ except ImportError:
     create_compositor = None
     _compositor_available = False
 
+# Try to import skeleton engine
+try:
+    from avatar_engines.skeleton import (
+        is_service_available,
+        get_gloss_sequence,
+        generate_pose,
+        SkeletonServiceError,
+    )
+
+    _skeleton_available = True
+except ImportError:
+    print("Warning: Skeleton engine not available.")
+    _skeleton_available = False
+
 import matplotlib.pyplot as plt
 
 
@@ -58,6 +72,9 @@ def process_audio_to_avatar(audio_path, engine="stick"):
     if engine == "human_video":
         # Use WLASL video engine
         return process_with_wlasl(transcription, gloss_sequence)
+    elif engine == "skeleton":
+        # Use skeleton engine with FastAPI backend
+        return process_with_skeleton(transcription, gloss_sequence)
     else:
         # Use stick figure engine (default)
         return process_with_stick(transcription, gloss_sequence)
@@ -194,6 +211,52 @@ def process_with_wlasl(transcription, gloss_sequence):
     return transcription, gloss_sequence, output_path, downloaded_glosses
 
 
+def process_with_skeleton(transcription, gloss_sequence):
+    """
+    Process using skeleton avatar with FastAPI backend.
+
+    Calls the text-to-skeleton FastAPI service to generate pose file.
+    File is saved at: text-to-skeleton/output/poses/sample.pose
+
+    Returns:
+        tuple: (transcription, api_gloss_sequence, None, api_gloss_sequence)
+               None for result_data since no visualization in UI
+    """
+    print("Step 3: Generating skeleton pose via FastAPI service...")
+
+    # Check availability
+    if not _skeleton_available:
+        raise RuntimeError("Skeleton engine not available")
+
+    # Check service
+    if not is_service_available():
+        raise RuntimeError(
+            "Text-to-skeleton FastAPI service is not running.\n\n"
+            "To start the service:\n"
+            "  cd text-to-skeleton\n"
+            "  uvicorn main:app --reload\n\n"
+            "The service should run on http://localhost:8000"
+        )
+
+    try:
+        # Get gloss sequence using spaCy lemmatization
+        api_gloss_sequence = get_gloss_sequence(transcription)
+        print(f"API gloss sequence: {api_gloss_sequence}")
+
+        # Generate pose file (saves to text-to-skeleton/output/poses/sample.pose)
+        generate_pose(transcription)
+        print(
+            "Pose file generated successfully at: text-to-skeleton/output/poses/sample.pose"
+        )
+
+        # Return in same format as other engines
+        # result_data is None since we don't visualize in UI
+        return transcription, api_gloss_sequence, None, api_gloss_sequence
+
+    except SkeletonServiceError as e:
+        raise RuntimeError(f"Skeleton service error: {str(e)}")
+
+
 def process_text_to_avatar(text, engine="stick"):
     """
     Process text directly to avatar (skip ASR step)
@@ -218,6 +281,9 @@ def process_text_to_avatar(text, engine="stick"):
     if engine == "human_video":
         # Use WLASL video engine
         return process_with_wlasl(text, gloss_sequence)
+    elif engine == "skeleton":
+        # Use skeleton engine with FastAPI backend
+        return process_with_skeleton(text, gloss_sequence)
     else:
         # Use stick figure engine (default)
         return process_with_stick(text, gloss_sequence)
