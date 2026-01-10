@@ -1,5 +1,8 @@
 import os
 from fastapi import FastAPI, Response
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from spoken_to_signed.gloss_to_pose.lookup.fingerspelling_lookup import (
     FingerspellingPoseLookup,
 )
@@ -9,6 +12,20 @@ from spoken_to_signed.bin import _pose_to_video
 from utils import text_to_gloss__spacy_lemma
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+)
+
+# Use absolute path for static files
+script_dir = os.path.dirname(os.path.abspath(__file__))
+output_dir = os.path.join(script_dir, "output")
+app.mount("/output", StaticFiles(directory=output_dir), name="output")
 
 
 @app.get("/text-to-gloss")
@@ -72,4 +89,4 @@ async def text_to_video(text: str):
 
     _pose_to_video(pose, output_path)
 
-    return ''
+    return ""
