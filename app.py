@@ -7,7 +7,7 @@ import time
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from pipeline.process_audio import process_audio_to_avatar
+from pipeline.process_audio import process_audio_to_avatar, process_text_to_avatar
 from avatar_engines.stick.renderer import render_avatar_streamlit
 import matplotlib.pyplot as plt
 
@@ -66,7 +66,7 @@ if desc:
 # Input method selection
 input_method = st.radio(
     "Choose your input method:",
-    ("Local Audio Test", "Upload Audio File", "Microphone Input")
+    ("Local Audio Test", "Upload Audio File", "Microphone Input", "Type Text")
 )
 
 def show_results_dialog(transcription, gloss_sequence, valid_glosses, all_keypoints=None, video_path=None):
@@ -271,15 +271,52 @@ elif input_method == "Microphone Input":
     except ImportError:
         st.error("""
         ⚠️ **Missing Dependency: streamlit-audiorecorder**
-        
+
         To use microphone input, please install the required package:
-        
+
         ```bash
         pip install streamlit-audiorecorder
         ```
-        
+
         Or add `streamlit-audiorecorder` to your environment.yml and update your environment.
         """)
+
+# Option 4: Type Text
+elif input_method == "Type Text":
+    st.subheader("Type Your Text")
+
+    # Text input area
+    user_text = st.text_area(
+        "Enter text to translate to sign language:",
+        placeholder="Type your message here... (e.g., 'Hello, how are you?')",
+        height=100,
+        help="Enter any text and it will be converted to sign language"
+    )
+
+    if user_text:
+        # Check if selected engine is available
+        engine_available = is_engine_available(st.session_state.avatar_engine)
+        if not engine_available:
+            st.warning("🚧 Please select 'Stick Figure' or 'Human Video' engine in the sidebar to enable translation")
+        else:
+            # Show translate button
+            if st.button("Translate to Sign Language", type="primary"):
+                with st.spinner("Translating your text..."):
+                    try:
+                        # Process the text
+                        engine = st.session_state.get('avatar_engine', 'stick')
+                        result = process_text_to_avatar(user_text, engine=engine)
+                        text, gloss_sequence, result_data, valid_glosses = result
+
+                        # Show results in popup
+                        st.success("✅ Translation complete!")
+                        if engine == 'human_video':
+                            show_results_dialog(text, gloss_sequence, valid_glosses, video_path=result_data)
+                        else:
+                            show_results_dialog(text, gloss_sequence, valid_glosses, all_keypoints=result_data)
+
+                    except Exception as e:
+                        st.error(f"Error processing text: {str(e)}")
 
 # Add empty space at bottom
 st.markdown("<br><br>", unsafe_allow_html=True)

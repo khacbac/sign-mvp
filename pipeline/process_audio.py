@@ -194,41 +194,33 @@ def process_with_wlasl(transcription, gloss_sequence):
     return transcription, gloss_sequence, output_path, downloaded_glosses
 
 
-def process_text_to_avatar(text):
+def process_text_to_avatar(text, engine="stick"):
     """
     Process text directly to avatar (skip ASR step)
 
     Args:
         text (str): Input text to convert
+        engine (str): Avatar engine to use ('stick' or 'human_video')
 
     Returns:
-        tuple: (text, gloss_sequence, all_keypoints, valid_glosses)
+        tuple: (text, gloss_sequence, result_data, valid_glosses)
+               For stick: result_data = all_keypoints
+               For human_video: result_data = video_path
     """
     print(f"Processing text: {text}")
+    print(f"Using engine: {engine}")
 
     # Step 1: Convert text to ASL gloss
     print("Step 1: Converting to ASL gloss...")
     gloss_sequence = text_to_gloss(text)
     print(f"Gloss sequence: {gloss_sequence}")
 
-    # Step 2: Generate keypoints for each gloss
-    print("Step 2: Generating gesture keypoints...")
-    all_keypoints = []
-    valid_glosses = []
-
-    for gloss in gloss_sequence:
-        if gesture_exists(gloss):
-            keypoints = generate_keypoints(gloss)
-            all_keypoints.extend(keypoints)
-            valid_glosses.append(gloss)
-        else:
-            print(f"Warning: No gesture found for '{gloss}', skipping...")
-
-    print(
-        f"Generated {len(all_keypoints)} frames for {len(valid_glosses)} valid glosses"
-    )
-
-    return text, gloss_sequence, all_keypoints, valid_glosses
+    if engine == "human_video":
+        # Use WLASL video engine
+        return process_with_wlasl(text, gloss_sequence)
+    else:
+        # Use stick figure engine (default)
+        return process_with_stick(text, gloss_sequence)
 
 
 def animate_keypoints(all_keypoints, gloss_sequence):
