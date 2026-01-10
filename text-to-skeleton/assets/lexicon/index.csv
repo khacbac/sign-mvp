@@ -3,5 +3,7 @@ sgg/kleine.pose,de,sgg,0,0,kleine,Kleine,0
 sgg/kinder.pose,de,sgg,0,0,kinder,Kinder,0
 sgg/essen.pose,de,sgg,0,0,essen,Essen,0
 sgg/pizza.pose,de,sgg,0,0,pizza,Pizza,0
-ase/hello.pose,en,asl,0,0,hello,hello,0
-ase/world.pose,en,asl,0,0,world,world,0
+ase/hello.pose,en,ase,0,0,hello,hello,0
+ase/world.pose,en,ase,0,0,world,world,0
+ase/how-are-you.pose,en,ase,0,0,how are you,how-are-you,0
+ase/im-fine-how-are-you.pose,en,ase,0,0,im fine how are you,im-fine-how-are-you,0

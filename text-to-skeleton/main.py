@@ -49,6 +49,7 @@ async def text_to_pose(text: str):
         lexicon_path,
         backup=fingerspelling_lookup,
     )
+    print("glosses[0]", glosses[0])
 
     pose = gloss_to_pose(
         glosses[0],
@@ -83,7 +84,7 @@ async def text_to_video(text: str):
         glosses[0],
         pose_lookup=pose_lookup,
         spoken_language="en",
-        signed_language="asl",
+        signed_language="ase",
         anonymize=False,
     )
 
