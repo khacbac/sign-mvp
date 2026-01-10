@@ -1,31 +1,26 @@
 import os
-import sys
 from fastapi import FastAPI, Response
-
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "../tools/spoken-to-signed-translation")
-)
-from spoken_to_signed.text_to_gloss import spacylemma
 from spoken_to_signed.gloss_to_pose.lookup.fingerspelling_lookup import (
     FingerspellingPoseLookup,
 )
 from spoken_to_signed.gloss_to_pose.lookup.csv_lookup import CSVPoseLookup
 from spoken_to_signed.gloss_to_pose import gloss_to_pose
 from spoken_to_signed.bin import _pose_to_video
+from utils import text_to_gloss__spacy_lemma
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
 
 
 @app.get("/text-to-gloss")
 async def text_to_gloss(text: str):
-    glosses = spacylemma.text_to_gloss(text, language="en", ignore_punctuation=True)
+    glosses = text_to_gloss__spacy_lemma(text, language="en", ignore_punctuation=True)
 
     return glosses
 
 
 @app.get("/text-to-pose")
 async def text_to_pose(text: str):
-    glosses = spacylemma.text_to_gloss(text, language="en", ignore_punctuation=True)
+    glosses = text_to_gloss__spacy_lemma(text, language="en", ignore_punctuation=True)
     fingerspelling_lookup = FingerspellingPoseLookup()
 
     # Use absolute path based on script location
@@ -54,7 +49,7 @@ async def text_to_pose(text: str):
 
 @app.get("/text-to-video")
 async def text_to_video(text: str):
-    glosses = spacylemma.text_to_gloss(text, language="en", ignore_punctuation=True)
+    glosses = text_to_gloss__spacy_lemma(text, language="en", ignore_punctuation=True)
     fingerspelling_lookup = FingerspellingPoseLookup()
 
     # Use absolute path based on script location
