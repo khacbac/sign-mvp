@@ -25,7 +25,7 @@ async def text_to_pose(text: str):
 
     # Use absolute path based on script location
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    lexicon_path = os.path.join(script_dir, "assets", "dummy_lexicon")
+    lexicon_path = os.path.join(script_dir, "assets", "lexicon")
     output_path = os.path.join(script_dir, "output", "poses", "sample.pose")
 
     pose_lookup = CSVPoseLookup(
@@ -37,7 +37,7 @@ async def text_to_pose(text: str):
         glosses[0],
         pose_lookup=pose_lookup,
         spoken_language="en",
-        signed_language="asl",
+        signed_language="ase",
         anonymize=False,
     )
 
