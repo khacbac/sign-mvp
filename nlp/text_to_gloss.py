@@ -1,6 +1,10 @@
 import string
 import re
 
+# Configuration constants
+DEFAULT_MAX_CHUNK_WORDS = 15
+MAX_INPUT_LENGTH = 1000
+
 # Manually defined stopwords for MVP (expanded)
 STOPWORDS = {
     # Articles & Determiners
@@ -136,7 +140,7 @@ SYNONYMS = {
 }
 
 
-def chunk_long_text(text: str, max_words: int = 15) -> list[str]:
+def chunk_long_text(text: str, max_words: int = DEFAULT_MAX_CHUNK_WORDS) -> list[str]:
     """
     Break long text into manageable chunks for signing.
 
@@ -194,8 +198,8 @@ def validate_input(text: str) -> tuple[bool, str]:
     if not text or not text.strip():
         return False, "Input text is empty"
 
-    if len(text) > 1000:
-        return False, "Input text is too long (max 1000 characters)"
+    if len(text) > MAX_INPUT_LENGTH:
+        return False, f"Input text is too long (max {MAX_INPUT_LENGTH} characters)"
 
     # Check if text has at least some alphabetic characters
     if not any(c.isalpha() for c in text):
@@ -205,7 +209,7 @@ def validate_input(text: str) -> tuple[bool, str]:
 
 
 def text_to_gloss(
-    text: str, chunk: bool = True, max_chunk_words: int = 15
+    text: str, chunk: bool = True, max_chunk_words: int = DEFAULT_MAX_CHUNK_WORDS
 ) -> list[str]:
     """
     Convert natural language text into sign-language-friendly gloss.

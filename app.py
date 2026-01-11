@@ -1,7 +1,13 @@
 import streamlit as st
 import sys
+import logging
 from pathlib import Path
 import time
+
+logger = logging.getLogger(__name__)
+
+# Animation configuration
+ANIMATION_FRAME_DELAY = 0.03  # seconds between frames
 
 # Add project root to path
 project_root = Path(__file__).parent
@@ -114,7 +120,7 @@ def show_results_dialog(
                     render_avatar_streamlit(
                         animation_placeholder, pose, text=current_gloss
                     )
-                    time.sleep(0.03)
+                    time.sleep(ANIMATION_FRAME_DELAY)
             else:
                 st.info("No animation data available")
 

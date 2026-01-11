@@ -2,6 +2,10 @@ import logging
 from .loader import gesture_exists
 from .interpolator import interpolate_gesture, default_pose
 
+# Animation configuration
+DEFAULT_ANIMATION_FRAMES = 30
+FINGERSPELL_MAX_LENGTH = 3  # Words with ≤3 chars treated as fingerspelled
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -20,7 +24,7 @@ def idle(_frame=0, _total=0):
     return default_pose.copy()
 
 
-def generate_keypoints(gloss, frames=30, use_fallback=True):
+def generate_keypoints(gloss, frames=DEFAULT_ANIMATION_FRAMES, use_fallback=True):
     """
     Generate keypoint sequence for a gesture.
 
@@ -52,7 +56,7 @@ def generate_keypoints(gloss, frames=30, use_fallback=True):
         # No gesture found - use fallback strategies
         if use_fallback:
             # Choose fallback based on word characteristics
-            if len(gloss) <= 3:
+            if len(gloss) <= FINGERSPELL_MAX_LENGTH:
                 # Short words might be fingerspelled
                 fallback_gloss = "FINGERSPELL"
                 logger.info(

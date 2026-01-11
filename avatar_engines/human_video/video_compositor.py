@@ -12,7 +12,8 @@ from datetime import datetime
 
 # Handle both moviepy 1.x and 2.x
 import moviepy
-MOVIE_PY_VERSION = getattr(moviepy, '__version__', '1.0.0')
+
+MOVIE_PY_VERSION = getattr(moviepy, "__version__", "1.0.0")
 
 try:
     # Try moviepy 2.x imports first
@@ -27,8 +28,12 @@ from .config import (
     OUTPUT_VIDEO_HEIGHT,
     OUTPUT_FPS,
     TRANSITION_DURATION,
-    TEMP_DIR
+    TEMP_DIR,
 )
+
+# Filename generation limits
+MAX_GLOSSES_IN_FILENAME = 5
+MAX_FILENAME_LENGTH = 50
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +46,7 @@ class VideoCompositor:
         output_width: int = OUTPUT_VIDEO_WIDTH,
         output_height: int = OUTPUT_VIDEO_HEIGHT,
         output_fps: int = OUTPUT_FPS,
-        transition_duration: float = TRANSITION_DURATION
+        transition_duration: float = TRANSITION_DURATION,
     ):
         """
         Initialize video compositor.
@@ -75,16 +80,22 @@ class VideoCompositor:
                 logger.error(f"Video file does not exist: {video_path}")
                 return None
 
-            logger.debug(f"Loading video clip: {video_path} (size: {video_path.stat().st_size} bytes)")
+            logger.debug(
+                f"Loading video clip: {video_path} (size: {video_path.stat().st_size} bytes)"
+            )
 
             clip = VideoFileClip(str(video_path))
 
             # Log video properties
-            logger.debug(f"Video loaded: {clip.size}, {clip.fps:.2f}fps, {clip.duration:.2f}s")
+            logger.debug(
+                f"Video loaded: {clip.size}, {clip.fps:.2f}fps, {clip.duration:.2f}s"
+            )
 
             # Resize if necessary (handle both MoviePy 1.x and 2.x)
             if clip.size != (self.output_width, self.output_height):
-                logger.debug(f"Resizing video from {clip.size} to {(self.output_width, self.output_height)}")
+                logger.debug(
+                    f"Resizing video from {clip.size} to {(self.output_width, self.output_height)}"
+                )
                 try:
                     # MoviePy 2.x
                     clip = clip.resized((self.output_width, self.output_height))
@@ -107,10 +118,13 @@ class VideoCompositor:
         except Exception as e:
             logger.error(f"Failed to load video {video_path}: {e}")
             import traceback
+
             logger.error(f"Load error traceback:\n{traceback.format_exc()}")
             return None
 
-    def _create_transition(self, clip1: VideoFileClip, clip2: VideoFileClip) -> VideoFileClip:
+    def _create_transition(
+        self, clip1: VideoFileClip, clip2: VideoFileClip
+    ) -> VideoFileClip:
         """
         Create a transition between two clips.
 
@@ -122,9 +136,6 @@ class VideoCompositor:
             Transition clip
         """
         # Simple crossfade for now
-        # clip1_fade = clip1.crossfadeout(self.transition_duration)
-        # clip2_fade = clip2.crossfadein(self.transition_duration)
-
         # Just return clip2 for now - transitions can be added later
         return clip2
 
@@ -133,7 +144,7 @@ class VideoCompositor:
         video_paths: List[Path],
         glosses: Optional[List[str]] = None,
         output_path: Optional[Path] = None,
-        add_transitions: bool = False
+        add_transitions: bool = False,
     ) -> Optional[Path]:
         """
         Composite multiple videos into a single video.
@@ -178,7 +189,9 @@ class VideoCompositor:
 
         try:
             logger.info(f"Compositing {len(clips)} videos")
-            logger.info(f"Video settings: {self.output_width}x{self.output_height} @ {self.output_fps}fps")
+            logger.info(
+                f"Video settings: {self.output_width}x{self.output_height} @ {self.output_fps}fps"
+            )
             logger.info(f"Temp directory: {TEMP_DIR} (exists: {TEMP_DIR.exists()})")
             logger.info(f"Using moviepy version: {MOVIE_PY_VERSION}")
 
@@ -196,8 +209,8 @@ class VideoCompositor:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 # Use glosses in filename if available
                 if valid_glosses:
-                    gloss_str = "_".join(valid_glosses[:5])  # First 5 glosses
-                    gloss_str = gloss_str.replace(" ", "_")[:50]  # Limit length
+                    gloss_str = "_".join(valid_glosses[:MAX_GLOSSES_IN_FILENAME])
+                    gloss_str = gloss_str.replace(" ", "_")[:MAX_FILENAME_LENGTH]
                     output_path = TEMP_DIR / f"wlasl_{gloss_str}_{timestamp}.mp4"
                 else:
                     output_path = TEMP_DIR / f"wlasl_composite_{timestamp}.mp4"
@@ -215,7 +228,7 @@ class VideoCompositor:
                 audio=False,  # Sign videos typically don't have audio
                 threads=4,
                 preset="medium",  # Balance between speed and quality
-                logger=None  # Suppress moviepy logging
+                logger=None,  # Suppress moviepy logging
             )
 
             # Clean up clips
@@ -237,6 +250,7 @@ class VideoCompositor:
 
             # Import traceback for full error details
             import traceback
+
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
 
             return None
@@ -255,9 +269,9 @@ class VideoCompositor:
             gloss_str = "empty_sequence"
         else:
             # Join first few glosses, limit length
-            gloss_str = "_".join(gloss_sequence[:5])
+            gloss_str = "_".join(gloss_sequence[:MAX_GLOSSES_IN_FILENAME])
             gloss_str = gloss_str.replace(" ", "_").replace("-", "_")
-            gloss_str = gloss_str[:50]  # Limit filename length
+            gloss_str = gloss_str[:MAX_FILENAME_LENGTH]
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"sign_language_{gloss_str}_{timestamp}.mp4"
@@ -290,9 +304,13 @@ class VideoCompositor:
             "video_count": len(video_paths),
             "valid_videos": valid_videos,
             "total_duration_seconds": total_duration,
-            "estimated_output_duration": total_duration + (valid_videos - 1) * self.transition_duration if valid_videos > 0 else 0,
+            "estimated_output_duration": (
+                total_duration + (valid_videos - 1) * self.transition_duration
+                if valid_videos > 0
+                else 0
+            ),
             "transition_count": max(0, valid_videos - 1),
-            "transition_duration": self.transition_duration
+            "transition_duration": self.transition_duration,
         }
 
 
@@ -302,59 +320,3 @@ def create_compositor(**kwargs) -> VideoCompositor:
 
 
 __all__ = ["VideoCompositor", "create_compositor"]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

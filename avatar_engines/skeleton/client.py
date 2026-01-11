@@ -2,7 +2,10 @@
 HTTP client for communicating with the text-to-skeleton FastAPI service
 """
 
+import logging
 import requests
+
+logger = logging.getLogger(__name__)
 
 FASTAPI_BASE_URL = "http://localhost:8000"
 REQUEST_TIMEOUT = 30
@@ -19,7 +22,8 @@ def is_service_available():
     try:
         response = requests.get(f"{FASTAPI_BASE_URL}/docs", timeout=5)
         return response.status_code == 200
-    except:
+    except (requests.exceptions.RequestException, ConnectionError, TimeoutError) as e:
+        logger.debug("Service availability check failed: %s", e)
         return False
 
 
