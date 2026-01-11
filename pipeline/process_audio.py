@@ -216,7 +216,7 @@ def process_with_skeleton(transcription, gloss_sequence):
     Process using skeleton avatar with FastAPI backend.
 
     Calls the text-to-skeleton FastAPI service to generate pose file.
-    File is saved at: text-to-skeleton/output/poses/sample.pose
+    File is saved at: text-to-skeleton/output/poses/{safe_filename(transcription)}.pose
 
     Returns:
         tuple: (transcription, api_gloss_sequence, None, api_gloss_sequence)
@@ -242,11 +242,19 @@ def process_with_skeleton(transcription, gloss_sequence):
         # Get gloss sequence using spaCy lemmatization
         api_gloss_sequence = get_gloss_sequence(transcription)
         print(f"API gloss sequence: {api_gloss_sequence}")
+        # Generate a safe filename based on the input text
+        import re
 
-        # Generate pose file (saves to text-to-skeleton/output/poses/sample.pose)
+        # Generate pose file (saves to text-to-skeleton/output/poses/{safe_filename(transcription)}.pose)
+        def safe_filename(text):
+            name = text.strip().lower()
+            name = re.sub(r"\s+", "_", name)
+            name = re.sub(r"[^a-zA-Z0-9_]", "", name)
+            return name[:40] or "pose"
+
         generate_pose(transcription)
         print(
-            "Pose file generated successfully at: text-to-skeleton/output/poses/sample.pose"
+            f"Pose file generated successfully at: text-to-skeleton/output/poses/{safe_filename(transcription)}.pose"
         )
 
         # Return in same format as other engines

@@ -44,7 +44,17 @@ async def text_to_pose(text: str):
     # Use absolute path based on script location
     script_dir = os.path.dirname(os.path.abspath(__file__))
     lexicon_path = os.path.join(script_dir, "assets", "lexicon")
-    output_path = os.path.join(script_dir, "output", "poses", "sample.pose")
+    # Generate a safe filename based on the input text
+    import re
+
+    def safe_filename(text):
+        name = text.strip().lower()
+        name = re.sub(r"\s+", "_", name)
+        name = re.sub(r"[^a-zA-Z0-9_]", "", name)
+        return name[:40] or "pose"
+
+    pose_filename = f"{safe_filename(text)}.pose"
+    output_path = os.path.join(script_dir, "output", "poses", pose_filename)
 
     pose_lookup = CSVPoseLookup(
         lexicon_path,

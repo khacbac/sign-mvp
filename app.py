@@ -122,7 +122,9 @@ def show_results_dialog(
             # Show success message for skeleton mode
             st.success("✅ Skeleton pose file generated successfully!")
             st.write(f"**Detected glosses (spaCy):** {', '.join(valid_glosses)}")
-            st.info("📁 **File location:** `text-to-skeleton/output/poses/sample.pose`")
+            st.info(
+                "📁 **File location:** `text-to-skeleton/output/poses/safe_filename(transcription).pose`"
+            )
 
             # Show helpful note
             with st.expander("ℹ️ How to access the pose file"):
@@ -130,7 +132,7 @@ def show_results_dialog(
                     """
                 The `.pose` file has been generated at:
                 ```
-                text-to-skeleton/output/poses/sample.pose
+                text-to-skeleton/output/poses/safe_filename(transcription).pose
                 ```
 
                 You can use this file with pose visualization tools or scripts in the `text-to-skeleton/` directory.
