@@ -1,10 +1,12 @@
 import os
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 import sys
 import whisper
 
-def transcribe_audio(audio_path: str, model_size: str = "base") -> str:
+
+def transcribe_audio(audio_path: str, model_size: str = "medium") -> str:
     """
     Transcribes an audio file to text using Whisper.
 
